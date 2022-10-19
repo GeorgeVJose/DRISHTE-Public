@@ -20,7 +20,6 @@
 </br>
 
 
-
 DRISHT-E is a novel offline video based fully-automated traffic
 data extractor tool for non-lane-based traffic conditions. The objective of this software is to make it compatible with mixed traffic conditions, including
 * Signalized Intersections
@@ -38,7 +37,7 @@ Drone-based video data was taken from multiple locations at different times of t
 - Gujarat
 - Bhopal
   
-A novel dataset of annotated drone footage consists of 186K frames with over 4M annotations. Annotated vehicle categories include `2-Wheeler` , `3-Wheeler`, `Car`, `LCV` and `Heavy-Vehicle` (Bus & Truck).
+A novel dataset of annotated drone footage consists of `186K frames` with over `4M annotations`. Annotated vehicle categories include `2-Wheeler` , `3-Wheeler`, `Car`, `LCV` and `Heavy-Vehicle` (Bus & Truck).
 
 ### Training
 `YOLOv5` is used to train on this dataset with 2 Nvidia 1080Ti GPUs. Trained models are exported to torchscript format to be used in the software.
@@ -55,7 +54,8 @@ These trackers are interchangeably used to maximise the processing speed and red
   
 ## DRISHT-E Software
 The software is created using python using frameworks like 
-<!-- |  | |
+<!-- 
+|  | |
 | --------- | ------- |
 | PyTorch, TorchVision | Model inference & processing |
 | OpenCV | Video & Image operations |
@@ -63,9 +63,9 @@ The software is created using python using frameworks like
 | Pandas | Trajectory data analysis |
 | Streamlit | Visualization | -->
 
-* `PyTorch,TorchVision`: Model inference & processing
+* `PyTorch`,`TorchVision`: Model inference & processing
 * `OpenCV`: Video & Image operations
-* `Numpy`, Scipy: Numeric operations
+* `Numpy`, `Scipy`: Numeric operations
 * `Pandas`: Trajectory data analysis
 * `Streamlit`: Visualization
 
@@ -74,4 +74,4 @@ The software is created using python using frameworks like
 ![Product Name Screen Shot](images/Execution_Mannanthala_0007_Stabilized.png)
 
 ## Info
-This project is currently under development. Much of the data, especially in training and results are redacted due to the ongoing research.
+This project is currently under development. Much of the data, especially in training, results, algorithm are redacted due to the ongoing research.
