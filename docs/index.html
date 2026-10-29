@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DRISHT-E: traffic data from drone video</title>
+<meta name="description" content="DRISHT-E turns drone footage of mixed traffic into vehicle trajectories, gate counts and speeds, from two-wheelers to heavy vehicles. A desktop app for Windows.">
+<meta property="og:title" content="DRISHT-E">
+<meta property="og:description" content="Turn drone footage of mixed traffic into vehicle trajectories, gate counts and speeds.">
+<meta property="og:image" content="assets/demo-poster.jpg">
+<link rel="icon" href="assets/favicon.png">
+<style>
+@font-face {
+  font-family: "Instrument Sans";
+  src: url("assets/fonts/instrument-sans-latin-wdth-normal.woff2") format("woff2");
+  font-weight: 400 700; font-stretch: 75% 100%; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Instrument Sans";
+  src: url("assets/fonts/instrument-sans-latin-wdth-italic.woff2") format("woff2");
+  font-weight: 400 700; font-stretch: 75% 100%; font-style: italic; font-display: swap;
+}
+
+/* The app's own colours (DRISHT-E desktop app and user guide) */
+:root {
+  --ink: #17212d; --ink-raised: #213041; --ink-line: #2d3d50; --ink-fg: #e6ebf1; --ink-muted: #95a3b4;
+  --paper: #f2f4f7; --surface: #ffffff; --line: #dde3ea; --line-strong: #c5cfda;
+  --fg: #1a2532; --fg-muted: #526175; --fg-subtle: #677689;
+  --brand: #1f6cb0; --brand-strong: #185a94; --brand-soft: #e8f1fa;
+  --signal: #f2ae40; --signal-strong: #b67608;
+  --c-2w: #2a78d6; --c-3w: #eb6834; --c-car: #1baf7a; --c-lcv: #eda100; --c-hv: #e87ba4;
+  --measure: 34rem;
+  --gutter: clamp(1rem, 4vw, 3rem);
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  margin: 0; background: var(--surface); color: var(--fg);
+  font-family: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
+  font-size: 1.0625rem; line-height: 1.6; font-variant-numeric: tabular-nums;
+}
+img, video { display: block; max-width: 100%; height: auto; }
+a { color: var(--brand); text-underline-offset: 0.18em; }
+a:hover { color: var(--brand-strong); }
+:focus-visible { outline: 2px solid var(--signal); outline-offset: 3px; border-radius: 4px; }
+p { margin: 0 0 1em; }
+h1, h2, h3 { font-stretch: 80%; line-height: 1.05; margin: 0; letter-spacing: -0.005em; }
+
+.wrap { max-width: 75rem; margin: 0 auto; padding: 0 var(--gutter); }
+.skip { position: absolute; left: -999px; top: 0.5rem; background: var(--surface); color: var(--fg); padding: 0.5rem 0.9rem; border-radius: 6px; z-index: 10; }
+.skip:focus { left: 0.5rem; }
+
+/* Corner brackets: the marks DRISHT-E draws around every vehicle */
+.brackets { position: relative; --b: 22px; --t: 2px; --c: var(--signal); }
+.brackets::before, .brackets::after {
+  content: ""; position: absolute; inset: calc(-1 * var(--gap, 10px)); pointer-events: none;
+  background:
+    linear-gradient(var(--c), var(--c)) top left / var(--b) var(--t) no-repeat,
+    linear-gradient(var(--c), var(--c)) top left / var(--t) var(--b) no-repeat,
+    linear-gradient(var(--c), var(--c)) top right / var(--b) var(--t) no-repeat,
+    linear-gradient(var(--c), var(--c)) top right / var(--t) var(--b) no-repeat;
+}
+.brackets::after {
+  background:
+    linear-gradient(var(--c), var(--c)) bottom left / var(--b) var(--t) no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom left / var(--t) var(--b) no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom right / var(--b) var(--t) no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom right / var(--t) var(--b) no-repeat;
+}
+
+/* Buttons */
+.btn { display: inline-flex; align-items: center; gap: 0.55rem; padding: 0.8rem 1.3rem; border-radius: 8px; font-weight: 650; font-size: 1rem; text-decoration: none; line-height: 1.2; border: 1px solid transparent; }
+.btn svg { width: 1.1em; height: 1.1em; flex: none; }
+.btn-primary { background: var(--brand); color: #fff; }
+.btn-primary:hover { background: var(--brand-strong); color: #fff; }
+.btn-ghost { color: var(--ink-fg); border-color: var(--ink-line); }
+.btn-ghost:hover { color: #fff; border-color: var(--ink-muted); background: var(--ink-raised); }
+.btn-light { color: var(--fg); border-color: var(--line-strong); background: var(--surface); }
+.btn-light:hover { color: var(--fg); border-color: var(--fg-subtle); }
+
+/* ---------- Top bar and hero ---------- */
+.hero { background: var(--ink); color: var(--ink-fg); position: relative; overflow: hidden; }
+.hero::before {
+  content: ""; position: absolute; inset: 0; opacity: 0.55; pointer-events: none;
+  background-image: linear-gradient(var(--ink-line) 1px, transparent 1px), linear-gradient(90deg, var(--ink-line) 1px, transparent 1px);
+  background-size: 48px 48px; mask-image: linear-gradient(to bottom, #000 0%, transparent 85%);
+}
+.top { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-top: 1.1rem; padding-bottom: 1.1rem; }
+.brand { display: flex; align-items: center; gap: 0.7rem; color: #fff; text-decoration: none; font-weight: 650; font-stretch: 80%; font-size: 1.35rem; letter-spacing: 0.02em; }
+.brand img { width: 40px; height: 40px; border-radius: 50%; }
+.top nav { display: flex; gap: 1.6rem; font-size: 0.95rem; }
+.top nav a { color: var(--ink-fg); text-decoration: none; opacity: 0.85; }
+.top nav a:hover { color: #fff; opacity: 1; }
+
+.hero-body { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: clamp(2rem, 5vw, 4.5rem); align-items: center; padding-top: clamp(2.5rem, 6vw, 5rem); padding-bottom: clamp(3.5rem, 7vw, 6rem); }
+.hero h1 { font-size: clamp(3.6rem, 9vw, 7.25rem); font-stretch: 76%; font-weight: 700; color: #fff; line-height: 0.88; }
+.hero .expansion { color: var(--ink-muted); font-size: 1rem; margin: 1rem 0 1.6rem; max-width: 32rem; }
+.hero .lede { font-size: clamp(1.2rem, 2vw, 1.45rem); line-height: 1.4; color: #fff; max-width: 28rem; margin-bottom: 2rem; }
+.hero .ctas { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.hero .fine { margin-top: 1.1rem; font-size: 0.875rem; color: var(--ink-muted); }
+
+.stage { --gap: 12px; }
+.stage video { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 4px; background: #0e151d; }
+.legend { display: flex; flex-wrap: wrap; gap: 0.4rem 1.1rem; margin-top: 1.5rem; font-size: 0.875rem; color: var(--ink-fg); }
+.legend span { display: inline-flex; align-items: center; gap: 0.45rem; }
+.dot { width: 0.6rem; height: 0.6rem; border-radius: 50%; flex: none; display: inline-block; }
+
+/* ---------- Sections ---------- */
+section { padding: clamp(4rem, 8vw, 6.5rem) 0; }
+.sec-head { max-width: 40rem; margin-bottom: clamp(2.2rem, 4vw, 3.2rem); }
+.sec-head h2 { font-size: clamp(2.1rem, 4.5vw, 3.1rem); font-weight: 700; color: var(--ink); }
+.sec-head p { color: var(--fg-muted); font-size: 1.125rem; margin-top: 0.9rem; }
+
+/* Workflow: a real sequence, so it is numbered */
+.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border-top: 2px solid var(--ink); counter-reset: step; }
+.steps li { counter-increment: step; padding: 1.6rem 2rem 0.5rem 0; position: relative; }
+.steps li + li { padding-left: 2rem; border-left: 1px solid var(--line); }
+.steps li::before { content: counter(step); display: block; font-stretch: 76%; font-weight: 700; font-size: 3.2rem; line-height: 1; color: var(--signal); margin-bottom: 0.9rem; }
+.steps h3 { font-size: 1.5rem; font-weight: 700; color: var(--ink); margin-bottom: 0.6rem; }
+.steps p { color: var(--fg-muted); max-width: 22rem; }
+
+/* Feature rows: screenshot and text, alternating */
+.features { background: var(--paper); }
+.feature { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: clamp(2rem, 5vw, 4.5rem); align-items: center; }
+.feature + .feature { margin-top: clamp(4rem, 8vw, 6.5rem); }
+.feature:nth-of-type(even) .shot { order: 2; }
+.shot { --gap: 9px; --c: var(--ink); --b: 18px; }
+.shot img { border-radius: 6px; border: 1px solid var(--line); box-shadow: 0 18px 40px -24px rgba(23, 33, 45, 0.45); background: var(--surface); }
+.feature h3 { font-size: clamp(1.7rem, 3vw, 2.2rem); font-weight: 700; color: var(--ink); margin-bottom: 0.9rem; }
+.feature p { color: var(--fg-muted); max-width: var(--measure); }
+.feature ul { margin: 0.4rem 0 0; padding-left: 1.1rem; color: var(--fg-muted); max-width: var(--measure); }
+.feature li { margin-bottom: 0.35rem; }
+.feature li::marker { color: var(--signal-strong); }
+.inset { margin-top: 1.4rem; max-width: 24rem; }
+.inset img { border-radius: 8px; }
+
+/* Mixed traffic */
+.classes { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; border-top: 2px solid var(--ink); }
+.classes div { padding: 1.3rem 1.2rem 0.3rem 0; }
+.classes div + div { padding-left: 1.2rem; border-left: 1px solid var(--line); }
+.classes b { display: flex; align-items: center; gap: 0.5rem; font-size: 1.15rem; color: var(--ink); font-stretch: 85%; }
+.classes span { display: block; color: var(--fg-muted); font-size: 0.95rem; margin-top: 0.35rem; }
+.places { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2rem; margin-top: clamp(2.5rem, 5vw, 3.5rem); }
+.places h3 { font-size: 1.3rem; font-weight: 700; color: var(--ink); margin-bottom: 0.5rem; }
+.places p { color: var(--fg-muted); font-size: 1rem; }
+
+/* Download */
+.download { background: var(--ink); color: var(--ink-fg); }
+.download .sec-head h2 { color: #fff; }
+.download .sec-head p { color: var(--ink-muted); }
+.dl-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(2rem, 5vw, 4.5rem); }
+.dl-grid h3 { font-size: 1.35rem; color: #fff; font-weight: 700; margin-bottom: 1rem; }
+.req { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 0.7rem 1.4rem; font-size: 1rem; }
+.req dt { color: var(--ink-muted); }
+.req dd { margin: 0; color: var(--ink-fg); }
+.install { margin: 0; padding: 0; list-style: none; counter-reset: i; }
+.install li { counter-increment: i; position: relative; padding-left: 2.6rem; margin-bottom: 1rem; }
+.install li::before { content: counter(i); position: absolute; left: 0; top: 0.05rem; width: 1.7rem; height: 1.7rem; border-radius: 50%; border: 1.5px solid var(--signal); color: var(--signal); font-weight: 700; font-size: 0.9rem; display: grid; place-items: center; }
+.install code, .download code { font-family: "Cascadia Mono", "SF Mono", Consolas, monospace; font-size: 0.86em; background: var(--ink-raised); border: 1px solid var(--ink-line); padding: 0.05rem 0.35rem; border-radius: 4px; color: #fff; overflow-wrap: anywhere; }
+.download .ctas { margin-top: 2.2rem; display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.download .note { color: var(--ink-muted); font-size: 0.95rem; margin-top: 1.4rem; max-width: 36rem; }
+
+/* User guide */
+.guide-grid { display: grid; grid-template-columns: minmax(0, 15rem) minmax(0, 1fr); gap: clamp(2rem, 5vw, 4.5rem); align-items: center; }
+.guide-cover { --gap: 10px; --c: var(--ink); --b: 16px; }
+.guide-cover img { border-radius: 4px; box-shadow: 0 22px 40px -22px rgba(23, 33, 45, 0.55); }
+.guide-grid h2 { font-size: clamp(2.1rem, 4.5vw, 3.1rem); font-weight: 700; color: var(--ink); margin-bottom: 1rem; }
+.guide-grid p { color: var(--fg-muted); max-width: var(--measure); }
+.chapters { columns: 2; column-gap: 2rem; padding: 0; margin: 1.2rem 0 1.8rem; list-style: none; color: var(--fg); font-size: 0.98rem; max-width: 34rem; }
+.chapters li { padding: 0.35rem 0; border-bottom: 1px solid var(--line); break-inside: avoid; }
+
+/* Footer */
+footer { background: var(--paper); border-top: 1px solid var(--line); padding: 2.6rem 0; font-size: 0.95rem; color: var(--fg-muted); }
+.foot { display: flex; flex-wrap: wrap; align-items: center; gap: 1.5rem 2.5rem; }
+.foot .logos { display: flex; gap: 1.2rem; align-items: center; }
+.foot .logos img { height: 52px; width: auto; mix-blend-mode: multiply; }
+.foot .credit b { color: var(--fg); font-weight: 650; }
+.foot .links { margin-left: auto; display: flex; gap: 1.4rem; }
+
+/* ---------- Small screens ---------- */
+@media (max-width: 900px) {
+  .hero-body, .feature, .dl-grid, .guide-grid { grid-template-columns: minmax(0, 1fr); }
+  .feature:nth-of-type(even) .shot { order: 0; }
+  .classes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .classes div, .classes div + div { padding: 1.1rem 1rem 0.3rem 0; border-left: 0; border-top: 1px solid var(--line); }
+  .classes { border-top-width: 2px; }
+  .places { grid-template-columns: minmax(0, 1fr); gap: 1.2rem; }
+  .guide-cover { max-width: 13rem; }
+}
+@media (max-width: 720px) {
+  .top nav { display: none; }
+  .steps { grid-template-columns: minmax(0, 1fr); }
+  .steps li, .steps li + li { padding: 1.4rem 0 0.4rem; border-left: 0; }
+  .steps li + li { border-top: 1px solid var(--line); }
+  .chapters { columns: 1; }
+  .foot .links { margin-left: 0; }
+  .stage { --gap: 8px; --b: 16px; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="hero">
+  <div class="wrap top">
+    <a class="brand" href="#">
+      <img src="assets/drishte-logo.png" alt="">
+      DRISHT-E
+    </a>
+    <nav aria-label="Sections">
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="#download">Download</a>
+      <a href="#guide">User guide</a>
+    </nav>
+  </div>
+
+  <div class="wrap hero-body">
+    <div>
+      <h1>DRISHT-E</h1>
+      <p class="expansion">Drone Integrated System for Heterogeneous Traffic Extraction</p>
+      <p class="lede">Turn drone footage of mixed traffic into vehicle trajectories, gate counts and speeds, from two-wheelers to heavy vehicles.</p>
+      <div class="ctas">
+        <a class="btn btn-primary" href="https://github.com/GeorgeVJose/DRISHTE-Public/releases/latest">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 21h16"/></svg>
+          Download for Windows
+        </a>
+        <a class="btn btn-ghost" href="DRISHT-E_User_Guide.pdf">Read the user guide</a>
+      </div>
+      <p class="fine">For Windows 10 and 11. Runs offline on your own computer.</p>
+    </div>
+
+    <div>
+      <div class="brackets stage">
+        <video id="demo" autoplay muted loop playsinline preload="metadata" poster="assets/demo-poster.jpg" aria-label="DRISHT-E tracking traffic at a busy junction: every vehicle has an ID, a box turned to its direction of travel and a trail of its recent path">
+          <source src="assets/demo.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="legend" aria-label="Vehicle classes">
+        <span><i class="dot" style="background:var(--c-2w)"></i>Two-wheeler</span>
+        <span><i class="dot" style="background:var(--c-3w)"></i>Three-wheeler</span>
+        <span><i class="dot" style="background:var(--c-car)"></i>Car</span>
+        <span><i class="dot" style="background:var(--c-lcv)"></i>Light commercial</span>
+        <span><i class="dot" style="background:var(--c-hv)"></i>Heavy vehicle</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <section id="how">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2>From a drone video to traffic data</h2>
+        <p>DRISHT-E is a desktop app for traffic engineers and researchers. Three steps take you from footage to numbers you can use.</p>
+      </div>
+      <ol class="steps">
+        <li>
+          <h3>Set up a job</h3>
+          <p>Add a drone video, choose which vehicle classes to detect, and draw gates across the roads you want counted.</p>
+        </li>
+        <li>
+          <h3>Process</h3>
+          <p>DRISHT-E finds every vehicle and follows it through the video. Jobs queue and run one at a time in the background.</p>
+        </li>
+        <li>
+          <h3>Review results</h3>
+          <p>Watch the tracked video, study trajectories and statistics, calibrate for speeds, and download the data.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="features" id="features">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2>What you can do with it</h2>
+        <p>Every result comes from the same tracks, so the video, the counts, the speeds and the downloaded data always agree.</p>
+      </div>
+
+      <article class="feature">
+        <figure class="brackets shot" style="margin:0">
+          <img src="assets/screens/video.jpg" alt="The Video tab following one car through a junction, with its status in the corner" loading="lazy" width="1800" height="1417">
+        </figure>
+        <div>
+          <h3>Follow every vehicle</h3>
+          <p>Play the video with each vehicle's box, label and recent path drawn on top. Boxes turn with the direction of travel and hold still when a vehicle stops.</p>
+          <p>Click any vehicle to follow it. A panel in the corner shows its class, its status and a health score, so you can see at a glance whether a track can be trusted. Export the result as an MP4, exactly as you see it.</p>
+          <figure class="inset" style="margin-left:0;margin-right:0">
+            <img src="assets/screens/infopanel.jpg" alt="The info panel: health 70%, vehicle 73, Car, Confirmed, in view for 11 seconds" loading="lazy" width="488" height="134">
+          </figure>
+        </div>
+      </article>
+
+      <article class="feature">
+        <figure class="brackets shot" style="margin:0">
+          <img src="assets/screens/gates.jpg" alt="Gate counts: two gates with their crossings, vehicles and downloads" loading="lazy" width="1800" height="768">
+        </figure>
+        <div>
+          <h3>Count at gates</h3>
+          <p>Draw lines across the carriageway before processing, and DRISHT-E records every vehicle that crosses each one, with the time.</p>
+          <p>Counts include only vehicles the tracker is confident about; doubtful ones are listed alongside, so nothing is hidden from you.</p>
+        </div>
+      </article>
+
+      <article class="feature">
+        <figure class="brackets shot" style="margin:0">
+          <img src="assets/screens/calibration.jpg" alt="Calibration: five points marked on the frame, their coordinates typed in, and a metre grid over the road" loading="lazy" width="1800" height="1216">
+        </figure>
+        <div>
+          <h3>Measure real speeds</h3>
+          <p>Mark four or more road points whose coordinates you know, in metres or latitude and longitude. DRISHT-E fits the view to the ground and turns every position into metres and every movement into km/h.</p>
+          <p>It shows how well each point fits and flags a mistyped one, and a measuring tool lets you check a lane width before you rely on the numbers. Drone drift is compensated, so speeds stay true when the camera moves.</p>
+        </div>
+      </article>
+
+      <article class="feature">
+        <figure class="brackets shot" style="margin:0">
+          <img src="assets/screens/trajectories.jpg" alt="Every vehicle's path drawn over a roundabout, coloured by class, with one vehicle selected" loading="lazy" width="1800" height="1376">
+        </figure>
+        <div>
+          <h3>Read the whole scene</h3>
+          <ul>
+            <li>Every trajectory over a frame of the video, coloured by class</li>
+            <li>Each vehicle's entry, exit, time in view and speed over time</li>
+            <li>Vehicles in view over time, the class mix and time in view</li>
+            <li>A speed distribution and a map of where vehicles drive</li>
+          </ul>
+          <p style="margin-top:1rem">Parked vehicles and doubtful tracks are flagged rather than thrown away. Switch them in or out and every view follows.</p>
+        </div>
+      </article>
+
+      <article class="feature">
+        <figure class="brackets shot" style="margin:0">
+          <img src="assets/screens/data.jpg" alt="The Raw data tab: one row per vehicle per frame, with filters for class, vehicle and time" loading="lazy" width="1800" height="1368">
+        </figure>
+        <div>
+          <h3>Take the data anywhere</h3>
+          <p>Every vehicle in every frame: ID, class, box, position, direction of travel, status and health, and on calibrated jobs, metres and km/h. Filter and sort it in the app, or download it as CSV for Excel, Python, R or MATLAB.</p>
+          <p>Each gate has its own downloads: every crossing, and the full paths of the vehicles that crossed.</p>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section id="traffic">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2>Built for mixed traffic</h2>
+        <p>Lane-less roads where two-wheelers weave between cars and auto-rickshaws, buses and trucks share the same space. DRISHT-E recognises five classes of vehicle.</p>
+      </div>
+      <div class="classes">
+        <div><b><i class="dot" style="background:var(--c-2w)"></i>Two-wheeler</b><span>Motorcycles, scooters, bicycles</span></div>
+        <div><b><i class="dot" style="background:var(--c-3w)"></i>Three-wheeler</b><span>Auto-rickshaws, e-rickshaws</span></div>
+        <div><b><i class="dot" style="background:var(--c-car)"></i>Car</b><span>Hatchbacks, sedans, SUVs</span></div>
+        <div><b><i class="dot" style="background:var(--c-lcv)"></i>Light commercial</b><span>Vans, pickups, small goods vehicles</span></div>
+        <div><b><i class="dot" style="background:var(--c-hv)"></i>Heavy vehicle</b><span>Buses, trucks</span></div>
+      </div>
+      <div class="places">
+        <div><h3>Intersections and roundabouts</h3><p>Signalised or not. Draw a gate on every arm to count turning and through traffic.</p></div>
+        <div><h3>Midblock sections</h3><p>Flows and speeds along a stretch of road, in both directions.</p></div>
+        <div><h3>Your data stays with you</h3><p>Everything runs on your own computer. No internet connection is needed, and videos never leave the machine.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="download" id="download">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2>Download for Windows</h2>
+        <p>One installer, no administrator rights and no internet connection needed.</p>
+      </div>
+      <div class="dl-grid">
+        <div>
+          <h3>System requirements</h3>
+          <dl class="req">
+            <dt>System</dt><dd>Windows 10 or Windows 11, 64-bit</dd>
+            <dt>Memory</dt><dd>16 GB RAM recommended</dd>
+            <dt>Disk</dt><dd>About 6 GB for the program, plus room for videos and results</dd>
+            <dt>Graphics</dt><dd>An NVIDIA GPU with a recent driver is recommended. Without one, DRISHT-E runs on the processor, which is much slower.</dd>
+            <dt>Internet</dt><dd>Not needed</dd>
+          </dl>
+        </div>
+        <div>
+          <h3>Install</h3>
+          <ol class="install">
+            <li>From the latest release, download the <code>.exe</code> and <strong>every</strong> <code>.bin</code> file, and keep them in one folder.</li>
+            <li>Run <code>DRISHT-E-Setup-&lt;version&gt;.exe</code>.</li>
+            <li>If Windows says “Windows protected your PC”, choose <strong>More info</strong>, then <strong>Run anyway</strong>. The installer isn't code-signed yet.</li>
+            <li>Open DRISHT-E from the Start menu. The first start can take a minute or two.</li>
+          </ol>
+        </div>
+      </div>
+      <div class="ctas">
+        <a class="btn btn-primary" href="https://github.com/GeorgeVJose/DRISHTE-Public/releases/latest">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 21h16"/></svg>
+          Get the latest release
+        </a>
+        <a class="btn btn-ghost" href="https://github.com/GeorgeVJose/DRISHTE-Public/releases">All releases</a>
+      </div>
+      <p class="note">To update, install the new version over the old one; your jobs and settings are kept. Results live in <code>%LOCALAPPDATA%\DRISHT-E</code>, and uninstalling leaves them in place.</p>
+    </div>
+  </section>
+
+  <section id="guide">
+    <div class="wrap guide-grid">
+      <a class="brackets guide-cover" href="DRISHT-E_User_Guide.pdf" aria-label="Open the DRISHT-E User Guide (PDF)">
+        <img src="assets/guide-cover.jpg" alt="Cover of the DRISHT-E User Guide" loading="lazy" width="496" height="702">
+      </a>
+      <div>
+        <h2>The user guide</h2>
+        <p>Everything from installing to troubleshooting, with a screenshot of every screen and an explanation of every column in the data.</p>
+        <ul class="chapters">
+          <li>Installing and starting</li>
+          <li>Setting up a job</li>
+          <li>Processing</li>
+          <li>Reviewing results</li>
+          <li>Calibrating for speeds</li>
+          <li>Your data files</li>
+          <li>Things to remember</li>
+          <li>Troubleshooting</li>
+        </ul>
+        <a class="btn btn-light" href="DRISHT-E_User_Guide.pdf">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5"/></svg>
+          Open the guide (PDF, 4.4 MB)
+        </a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <div class="logos">
+      <img src="assets/tse_logo.jpg" alt="Transportation Systems Engineering" width="257" height="278">
+      <img src="assets/iitb_logo.jpg" alt="IIT Bombay" width="625" height="599">
+    </div>
+    <div class="credit">
+      Designed and developed by <b>George V Jose</b><br>
+      Transportation Systems Engineering, IIT Bombay, © 2026
+    </div>
+    <div class="links">
+      <a href="https://github.com/GeorgeVJose/DRISHTE-Public">GitHub</a>
+      <a href="https://github.com/GeorgeVJose/DRISHTE-Public/releases">Releases</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Respect reduced motion: show the still frame with controls instead of an autoplaying loop
+  const demo = document.getElementById("demo");
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    demo.removeAttribute("autoplay");
+    demo.pause();
+    demo.controls = true;
+  }
+</script>
+</body>
+</html>
