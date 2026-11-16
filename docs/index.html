@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DRISHT-E: traffic data from drone video</title>
-<meta name="description" content="DRISHT-E turns drone footage of mixed traffic into vehicle trajectories, gate counts and speeds, from two-wheelers to heavy vehicles. A desktop app for Windows.">
+<title>DRISHT-E: traffic counts and speeds from drone video</title>
+<meta name="description" content="DRISHT-E counts, classifies and measures every vehicle in a drone video of a road or junction: classified counts, turning movements, speeds and vehicle paths for mixed Indian traffic. A desktop app for Windows that works offline.">
 <meta property="og:title" content="DRISHT-E">
-<meta property="og:description" content="Turn drone footage of mixed traffic into vehicle trajectories, gate counts and speeds.">
+<meta property="og:description" content="Count, classify and measure every vehicle on a road from a single drone video.">
 <meta property="og:image" content="assets/demo-poster.jpg">
 <link rel="icon" href="assets/favicon.png">
 <style>
@@ -97,7 +97,10 @@ h1, h2, h3 { font-stretch: 80%; line-height: 1.05; margin: 0; letter-spacing: -0
 .hero-body { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: clamp(2rem, 5vw, 4.5rem); align-items: center; padding-top: clamp(2.5rem, 6vw, 5rem); padding-bottom: clamp(3.5rem, 7vw, 6rem); }
 .hero h1 { font-size: clamp(3.6rem, 9vw, 7.25rem); font-stretch: 76%; font-weight: 700; color: #fff; line-height: 0.88; }
 .hero .expansion { color: var(--ink-muted); font-size: 1rem; margin: 1rem 0 1.6rem; max-width: 32rem; }
-.hero .lede { font-size: clamp(1.2rem, 2vw, 1.45rem); line-height: 1.4; color: #fff; max-width: 28rem; margin-bottom: 2rem; }
+.hero .lede { font-size: clamp(1.2rem, 2vw, 1.45rem); line-height: 1.4; color: #fff; max-width: 28rem; margin-bottom: 1rem; }
+.hero .sub { color: var(--ink-fg); max-width: 30rem; margin-bottom: 2rem; }
+.caption { margin: 1.4rem 0 0; font-size: 0.9rem; color: var(--ink-muted); max-width: 40rem; }
+.caption b { color: var(--ink-fg); font-weight: 650; }
 .hero .ctas { display: flex; flex-wrap: wrap; gap: 0.75rem; }
 .hero .fine { margin-top: 1.1rem; font-size: 0.875rem; color: var(--ink-muted); }
 
@@ -114,7 +117,7 @@ section { padding: clamp(4rem, 8vw, 6.5rem) 0; }
 .sec-head p { color: var(--fg-muted); font-size: 1.125rem; margin-top: 0.9rem; }
 
 /* Workflow: a real sequence, so it is numbered */
-.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border-top: 2px solid var(--ink); counter-reset: step; }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; border-top: 2px solid var(--ink); counter-reset: step; }
 .steps li { counter-increment: step; padding: 1.6rem 2rem 0.5rem 0; position: relative; }
 .steps li + li { padding-left: 2rem; border-left: 1px solid var(--line); }
 .steps li::before { content: counter(step); display: block; font-stretch: 76%; font-weight: 700; font-size: 3.2rem; line-height: 1; color: var(--signal); margin-bottom: 0.9rem; }
@@ -179,8 +182,38 @@ footer { background: var(--paper); border-top: 1px solid var(--line); padding: 2
 .foot .credit b { color: var(--fg); font-weight: 650; }
 .foot .links { margin-left: auto; display: flex; gap: 1.4rem; }
 
+/* Plain-language sections */
+.alt { background: var(--paper); }
+.cols3, .cols2 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2rem 2.5rem; }
+.cols2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.cols3 > div, .cols2 > div { border-top: 2px solid var(--ink); padding-top: 1.3rem; }
+.cols3 h3, .cols2 h3 { font-size: 1.3rem; font-weight: 700; color: var(--ink); margin-bottom: 0.6rem; }
+.cols3 p, .cols2 p { color: var(--fg-muted); font-size: 1rem; }
+.uses { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.2rem; }
+.uses article { background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--signal); border-radius: 8px; padding: 1.4rem 1.5rem 0.6rem; }
+.uses h3 { font-size: 1.3rem; font-weight: 700; color: var(--ink); margin-bottom: 0.6rem; }
+.uses p { color: var(--fg-muted); font-size: 1rem; }
+.tip { margin: clamp(2rem, 4vw, 2.8rem) 0 0; padding: 1rem 1.3rem; border-left: 3px solid var(--signal); background: var(--paper); border-radius: 0 6px 6px 0; max-width: 46rem; color: var(--fg); }
+.tip b { font-weight: 650; }
+.classes small { margin-right: 0.3rem; font-size: 0.72rem; font-weight: 650; color: var(--fg-subtle); border: 1px solid var(--line-strong); border-radius: 4px; padding: 0 0.3rem; letter-spacing: 0.03em; }
+.faq { max-width: 48rem; border-top: 2px solid var(--ink); }
+.faq details { border-bottom: 1px solid var(--line); }
+.faq summary { cursor: pointer; list-style: none; padding: 1.1rem 2rem 1.1rem 0; position: relative; font-weight: 650; font-size: 1.15rem; color: var(--ink); }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: "+"; position: absolute; right: 0.2rem; top: 0.9rem; font-size: 1.5rem; line-height: 1; color: var(--signal-strong); font-weight: 400; }
+.faq details[open] summary::after { content: "–"; }
+.faq details p { color: var(--fg-muted); max-width: 42rem; padding-bottom: 0.4rem; }
+.faq code { font-family: "Cascadia Mono", "SF Mono", Consolas, monospace; font-size: 0.86em; background: var(--paper); border: 1px solid var(--line); padding: 0.05rem 0.35rem; border-radius: 4px; color: var(--fg); }
+
 /* ---------- Small screens ---------- */
+@media (max-width: 1000px) {
+  .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .steps li:nth-child(odd) { padding-left: 0; border-left: 0; }
+  .steps li:nth-child(n+3) { border-top: 1px solid var(--line); margin-top: 1rem; }
+}
 @media (max-width: 900px) {
+  .cols3, .uses { grid-template-columns: minmax(0, 1fr); }
+  .cols2 { grid-template-columns: minmax(0, 1fr); }
   .hero-body, .feature, .dl-grid, .guide-grid { grid-template-columns: minmax(0, 1fr); }
   .feature:nth-of-type(even) .shot { order: 0; }
   .classes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -210,8 +243,9 @@ footer { background: var(--paper); border-top: 1px solid var(--line); padding: 2
       DRISHT-E
     </a>
     <nav aria-label="Sections">
-      <a href="#features">Features</a>
       <a href="#how">How it works</a>
+      <a href="#uses">What it measures</a>
+      <a href="#faq">Questions</a>
       <a href="#download">Download</a>
       <a href="#guide">User guide</a>
     </nav>
@@ -221,7 +255,8 @@ footer { background: var(--paper); border-top: 1px solid var(--line); padding: 2
     <div>
       <h1>DRISHT-E</h1>
       <p class="expansion">Drone Integrated System for Heterogeneous Traffic Extraction</p>
-      <p class="lede">Turn drone footage of mixed traffic into vehicle trajectories, gate counts and speeds, from two-wheelers to heavy vehicles.</p>
+      <p class="lede">Count, classify and measure every vehicle on a road from a single drone video.</p>
+      <p class="sub">Film a junction or a stretch of road from above. DRISHT-E picks out every motorbike, auto-rickshaw, car, van, bus and truck, follows each one through the video, and tells you how many passed, which way they went and how fast they were moving.</p>
       <div class="ctas">
         <a class="btn btn-primary" href="https://github.com/GeorgeVJose/DRISHTE-Public/releases/latest">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 21h16"/></svg>
@@ -229,7 +264,7 @@ footer { background: var(--paper); border-top: 1px solid var(--line); padding: 2
         </a>
         <a class="btn btn-ghost" href="DRISHT-E_User_Guide.pdf">Read the user guide</a>
       </div>
-      <p class="fine">For Windows 10 and 11. Runs offline on your own computer.</p>
+      <p class="fine">For Windows 10 and 11. Works offline, and your videos never leave your computer.</p>
     </div>
 
     <div>
@@ -238,7 +273,8 @@ footer { background: var(--paper); border-top: 1px solid var(--line); padding: 2
           <source src="assets/demo.mp4" type="video/mp4">
         </video>
       </div>
-      <div class="legend" aria-label="Vehicle classes">
+      <p class="caption"><b>What you're seeing:</b> each box is one vehicle that DRISHT-E has found. The colour shows its type, the number is its ID, and the tail traces where it has just been.</p>
+      <div class="legend" aria-label="Vehicle types">
         <span><i class="dot" style="background:var(--c-2w)"></i>Two-wheeler</span>
         <span><i class="dot" style="background:var(--c-3w)"></i>Three-wheeler</span>
         <span><i class="dot" style="background:var(--c-car)"></i>Car</span>
@@ -250,34 +286,87 @@ footer { background: var(--paper); border-top: 1px solid var(--line); padding: 2
 </header>
 
 <main id="main">
-  <section id="how">
+  <section id="why">
     <div class="wrap">
       <div class="sec-head">
-        <h2>From a drone video to traffic data</h2>
-        <p>DRISHT-E is a desktop app for traffic engineers and researchers. Three steps take you from footage to numbers you can use.</p>
+        <h2>Why count traffic from the sky?</h2>
+        <p>A new signal, flyover, footpath or bus lane starts with the same questions. How many vehicles use this road? What kinds? Which way do they turn, and how fast do they go?</p>
+      </div>
+      <div class="cols3">
+        <div><h3>Counting by hand is slow</h3><p>The usual answer is a team at the junction with tally sheets, or someone watching hours of video and clicking a counter. It is tiring work, it is easy to miss vehicles, and it records totals rather than how each vehicle actually moved.</p></div>
+        <div><h3>Indian traffic is hard to count</h3><p>Without fixed lanes, two-wheelers weave between cars and autos, while buses and trucks share the same space. Dozens of vehicles move at once, in every direction.</p></div>
+        <div><h3>A drone sees the whole picture</h3><p>From above, one camera covers an entire junction. DRISHT-E does the watching: it finds each vehicle, follows it from frame to frame, and turns the video into numbers you can put in a report.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="alt" id="how">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2>How it works</h2>
+        <p>Four steps take you from a drone flight to a spreadsheet. You don't need any programming: everything is point and click, and the default settings are tuned for Indian drone footage.</p>
       </div>
       <ol class="steps">
         <li>
+          <h3>Film the road</h3>
+          <p>Fly a drone over the junction or road. Keep it steady, point the camera as straight down as you can, and keep the whole study area in view.</p>
+        </li>
+        <li>
           <h3>Set up a job</h3>
-          <p>Add a drone video, choose which vehicle classes to detect, and draw gates across the roads you want counted.</p>
+          <p>Load the video into DRISHT-E, choose which vehicle types to look for, and draw counting lines, called <em>gates</em>, across the roads you want counted.</p>
         </li>
         <li>
-          <h3>Process</h3>
-          <p>DRISHT-E finds every vehicle and follows it through the video. Jobs queue and run one at a time in the background.</p>
+          <h3>Let it process</h3>
+          <p>DRISHT-E finds and follows every vehicle by itself, in the background. Queue several videos and they run one after another. An NVIDIA graphics card makes this about ten times faster.</p>
         </li>
         <li>
-          <h3>Review results</h3>
-          <p>Watch the tracked video, study trajectories and statistics, calibrate for speeds, and download the data.</p>
+          <h3>Review and download</h3>
+          <p>Watch the video with every vehicle marked, check the counts and charts, add a few known ground points to get speeds in km/h, and download the data.</p>
         </li>
       </ol>
+    </div>
+  </section>
+
+  <section id="uses">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2>What it measures</h2>
+        <p>DRISHT-E gives you the data behind the most common traffic surveys. Everything downloads as CSV spreadsheets that open in Excel, Google Sheets, Python, R or MATLAB.</p>
+      </div>
+      <div class="uses">
+        <article>
+          <h3>Classified volume counts</h3>
+          <p>Every vehicle that crosses a gate is logged with its ID and the time, and its type (2W, 3W, car, LCV or HV) comes from the tracking data. The time of each crossing lets you group counts into 5- or 15-minute intervals.</p>
+        </article>
+        <article>
+          <h3>Turning movements</h3>
+          <p>Put a gate on every arm of a junction or roundabout. A vehicle keeps the same ID at every gate it crosses, so matching the arm it entered on with the arm it left by gives you turning counts.</p>
+        </article>
+        <article>
+          <h3>Spot speeds</h3>
+          <p>Once the video is calibrated, every gate crossing also records the vehicle's speed in km/h at that line.</p>
+        </article>
+        <article>
+          <h3>Speeds through the scene</h3>
+          <p>Each vehicle's speed over time, with its average and top speed, plus a speed distribution and summary figures for the whole video.</p>
+        </article>
+        <article>
+          <h3>Vehicle trajectories</h3>
+          <p>The position of every vehicle in every frame, in metres once calibrated, with its direction of travel and size. The raw material for research into how mixed traffic behaves, such as how vehicles share the road width or interact at a merge.</p>
+        </article>
+        <article>
+          <h3>Traffic mix and activity</h3>
+          <p>The share of each vehicle type, how many vehicles were in view from moment to moment, how long they stayed, and a heat map of which paths carry the most traffic.</p>
+        </article>
+      </div>
     </div>
   </section>
 
   <section class="features" id="features">
     <div class="wrap">
       <div class="sec-head">
-        <h2>What you can do with it</h2>
-        <p>Every result comes from the same tracks, so the video, the counts, the speeds and the downloaded data always agree.</p>
+        <h2>A closer look</h2>
+        <p>Every result comes from the same set of tracked vehicles, so the video, the counts, the speeds and the downloaded data always agree with each other.</p>
       </div>
 
       <article class="feature">
@@ -285,9 +374,9 @@ footer { background: var(--paper); border-top: 1px solid var(--line); padding: 2
           <img src="assets/screens/video.jpg" alt="The Video tab following one car through a junction, with its status in the corner" loading="lazy" width="1800" height="1417">
         </figure>
         <div>
-          <h3>Follow every vehicle</h3>
-          <p>Play the video with each vehicle's box, label and recent path drawn on top. Boxes turn with the direction of travel and hold still when a vehicle stops.</p>
-          <p>Click any vehicle to follow it. A panel in the corner shows its class, its status and a health score, so you can see at a glance whether a track can be trusted. Export the result as an MP4, exactly as you see it.</p>
+          <h3>Watch every vehicle being tracked</h3>
+          <p>Play your video back with a box, a label and a short trail on every vehicle, so you can see exactly what DRISHT-E saw. Click any vehicle to follow it through the scene.</p>
+          <p>A small panel shows the vehicle's type, how long it has been in view, and a <em>health score</em>: how sure DRISHT-E is, at that moment, that it is still following the same real vehicle. Save the marked-up video as an MP4 for presentations and reports.</p>
           <figure class="inset" style="margin-left:0;margin-right:0">
             <img src="assets/screens/infopanel.jpg" alt="The info panel: health 70%, vehicle 73, Car, Confirmed, in view for 11 seconds" loading="lazy" width="488" height="134">
           </figure>
@@ -299,9 +388,9 @@ footer { background: var(--paper); border-top: 1px solid var(--line); padding: 2
           <img src="assets/screens/gates.jpg" alt="Gate counts: two gates with their crossings, vehicles and downloads" loading="lazy" width="1800" height="768">
         </figure>
         <div>
-          <h3>Count at gates</h3>
-          <p>Draw lines across the carriageway before processing, and DRISHT-E records every vehicle that crosses each one, with the time.</p>
-          <p>Counts include only vehicles the tracker is confident about; doubtful ones are listed alongside, so nothing is hidden from you.</p>
+          <h3>Count vehicles at any line</h3>
+          <p>Before processing, draw a line across the road wherever you want a count: each approach to a junction, the entry and exit of a roundabout, or a point midway along a road. DRISHT-E records every vehicle that crosses each line, with the time.</p>
+          <p>For each gate you see how many crossings there were and how many different vehicles made them, with separate downloads for each gate.</p>
         </div>
       </article>
 
@@ -310,9 +399,9 @@ footer { background: var(--paper); border-top: 1px solid var(--line); padding: 2
           <img src="assets/screens/calibration.jpg" alt="Calibration: five points marked on the frame, their coordinates typed in, and a metre grid over the road" loading="lazy" width="1800" height="1216">
         </figure>
         <div>
-          <h3>Measure real speeds</h3>
-          <p>Mark four or more road points whose coordinates you know, in metres or latitude and longitude. DRISHT-E fits the view to the ground and turns every position into metres and every movement into km/h.</p>
-          <p>It shows how well each point fits and flags a mistyped one, and a measuring tool lets you check a lane width before you rely on the numbers. Drone drift is compensated, so speeds stay true when the camera moves.</p>
+          <h3>Get real speeds and distances</h3>
+          <p>A video only knows pixels. To turn pixels into metres and km/h, click four or more spots on the road whose map coordinates you know, such as survey marks or kerb corners, and type in their coordinates, in metres or as latitude and longitude. This step is called <em>calibration</em>.</p>
+          <p>DRISHT-E lays a metre grid over the road, shows how far off each point is, and picks out one that looks mistyped. A measuring tool lets you check a distance you know, such as a lane width, before you rely on the numbers. It also corrects for the drone drifting during the flight, so speeds stay true. You can calibrate a finished job at any time without processing it again.</p>
         </div>
       </article>
 
@@ -321,14 +410,13 @@ footer { background: var(--paper); border-top: 1px solid var(--line); padding: 2
           <img src="assets/screens/trajectories.jpg" alt="Every vehicle's path drawn over a roundabout, coloured by class, with one vehicle selected" loading="lazy" width="1800" height="1376">
         </figure>
         <div>
-          <h3>Read the whole scene</h3>
+          <h3>See how the traffic moved</h3>
           <ul>
-            <li>Every trajectory over a frame of the video, coloured by class</li>
-            <li>Each vehicle's entry, exit, time in view and speed over time</li>
-            <li>Vehicles in view over time, the class mix and time in view</li>
-            <li>A speed distribution and a map of where vehicles drive</li>
+            <li>Every vehicle's path drawn over the road, coloured by type</li>
+            <li>For any vehicle: where it entered and left, how long it was in view, and its speed over time</li>
+            <li>How many vehicles were on the scene over time, and the mix of vehicle types</li>
+            <li>A speed distribution, and a heat map of where vehicles drive</li>
           </ul>
-          <p style="margin-top:1rem">Parked vehicles and doubtful tracks are flagged rather than thrown away. Switch them in or out and every view follows.</p>
         </div>
       </article>
 
@@ -338,30 +426,80 @@ footer { background: var(--paper); border-top: 1px solid var(--line); padding: 2
         </figure>
         <div>
           <h3>Take the data anywhere</h3>
-          <p>Every vehicle in every frame: ID, class, box, position, direction of travel, status and health, and on calibrated jobs, metres and km/h. Filter and sort it in the app, or download it as CSV for Excel, Python, R or MATLAB.</p>
-          <p>Each gate has its own downloads: every crossing, and the full paths of the vehicles that crossed.</p>
+          <p>The full dataset has one row for every vehicle in every frame of the video: its ID, type, position, size, direction of travel, track status and health, and, once calibrated, its position in metres and speed in km/h. Filter and sort it in the app, or download it as CSV.</p>
+          <p>Each gate has its own files too: every crossing, and the full paths of the vehicles that crossed. The <a href="DRISHT-E_User_Guide.pdf">user guide</a> explains every column.</p>
         </div>
       </article>
     </div>
   </section>
 
-  <section id="traffic">
+  <section id="trust">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2>Numbers you can check</h2>
+        <p>Any software makes mistakes, especially in dense traffic, under trees or at the edge of the frame. DRISHT-E is built to show you where its results are doubtful, rather than quietly hiding them.</p>
+      </div>
+      <div class="cols2">
+        <div><h3>Doubtful vehicles are flagged, not deleted</h3><p>Tracks that DRISHT-E never became confident were real vehicles are marked <em>unconfirmed</em>, and parked vehicles are marked <em>stationary</em>. Both are left out of the on-screen results by default, with a switch to bring them back in, and both stay in the downloads with a flag column.</p></div>
+        <div><h3>Counts show what was left out</h3><p>Gate totals include confirmed vehicles only. Crossings by unconfirmed tracks are listed in a column of their own, so you can see how many were set aside.</p></div>
+        <div><h3>Every moment has a confidence score</h3><p>In every frame, each vehicle has a health score and a status, such as <em>Hidden</em> behind a bus, <em>Leaving the frame</em>, or <em>Suspect</em> when the track may have jumped to a different vehicle.</p></div>
+        <div><h3>Calibration checks itself</h3><p>Each calibration point shows its own error, a point that disagrees with the rest is named, and coordinates that look swapped are refused.</p></div>
+      </div>
+      <p class="tip"><b>Before you report it:</b> follow the vehicle in the video with the info panel on, and check it isn't marked Suspect or low in health before you use its path or speed.</p>
+    </div>
+  </section>
+
+  <section class="alt" id="traffic">
     <div class="wrap">
       <div class="sec-head">
         <h2>Built for mixed traffic</h2>
-        <p>Lane-less roads where two-wheelers weave between cars and auto-rickshaws, buses and trucks share the same space. DRISHT-E recognises five classes of vehicle.</p>
+        <p>DRISHT-E sorts vehicles into five types. Each keeps the same colour throughout the app, and the short code is what appears in the data.</p>
       </div>
       <div class="classes">
-        <div><b><i class="dot" style="background:var(--c-2w)"></i>Two-wheeler</b><span>Motorcycles, scooters, bicycles</span></div>
-        <div><b><i class="dot" style="background:var(--c-3w)"></i>Three-wheeler</b><span>Auto-rickshaws, e-rickshaws</span></div>
-        <div><b><i class="dot" style="background:var(--c-car)"></i>Car</b><span>Hatchbacks, sedans, SUVs</span></div>
-        <div><b><i class="dot" style="background:var(--c-lcv)"></i>Light commercial</b><span>Vans, pickups, small goods vehicles</span></div>
-        <div><b><i class="dot" style="background:var(--c-hv)"></i>Heavy vehicle</b><span>Buses, trucks</span></div>
+        <div><b><i class="dot" style="background:var(--c-2w)"></i>Two-wheeler</b><span><small>2W</small> Motorcycles, scooters, bicycles</span></div>
+        <div><b><i class="dot" style="background:var(--c-3w)"></i>Three-wheeler</b><span><small>3W</small> Auto-rickshaws, e-rickshaws</span></div>
+        <div><b><i class="dot" style="background:var(--c-car)"></i>Car</b><span><small>Car</small> Hatchbacks, sedans, SUVs</span></div>
+        <div><b><i class="dot" style="background:var(--c-lcv)"></i>Light commercial</b><span><small>LCV</small> Vans, pickups, small goods vehicles</span></div>
+        <div><b><i class="dot" style="background:var(--c-hv)"></i>Heavy vehicle</b><span><small>HV</small> Buses, trucks</span></div>
       </div>
       <div class="places">
-        <div><h3>Intersections and roundabouts</h3><p>Signalised or not. Draw a gate on every arm to count turning and through traffic.</p></div>
-        <div><h3>Midblock sections</h3><p>Flows and speeds along a stretch of road, in both directions.</p></div>
-        <div><h3>Your data stays with you</h3><p>Everything runs on your own computer. No internet connection is needed, and videos never leave the machine.</p></div>
+        <div><h3>Junctions and roundabouts</h3><p>With or without traffic signals. Put a gate on every arm to count turning and straight-through traffic.</p></div>
+        <div><h3>Along a road</h3><p>Flows and speeds on a stretch of road away from junctions, in both directions.</p></div>
+        <div><h3>Your data stays with you</h3><p>Everything runs on your own computer. No internet connection is needed, and your videos are never uploaded anywhere.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2>Common questions</h2>
+      </div>
+      <div class="faq">
+        <details>
+          <summary>Do I need to know programming?</summary>
+          <p>No. DRISHT-E is a normal Windows program: you load a video, draw lines with the mouse and click buttons. The results open in Excel. If you do use Python, R or MATLAB, the same CSV files work there too.</p>
+        </details>
+        <details>
+          <summary>What kind of video works best?</summary>
+          <p>Any MP4, MOV, AVI, MKV or M4V file shot from a drone. For the best results, fly steady, point the camera as straight down as you can, turn off the drone's on-screen display, and keep the whole study area in view with some road beyond each counting line. Flying lower helps DRISHT-E spot small, distant two-wheelers.</p>
+        </details>
+        <details>
+          <summary>How long does processing take?</summary>
+          <p>It depends on the length and resolution of the video, how busy the road is, and your computer. An NVIDIA graphics card makes detection roughly ten times faster than the processor alone. Without one, expect a job to take many times longer than the video itself, so try a short clip first to get a feel for your machine.</p>
+        </details>
+        <details>
+          <summary>Is my video uploaded anywhere?</summary>
+          <p>No. DRISHT-E runs entirely on your own computer and works without an internet connection. Your videos and results stay in a folder on your machine.</p>
+        </details>
+        <details>
+          <summary>How do I get counts by vehicle type at a gate?</summary>
+          <p>Download the gate's Crossings file and the full tracking data, join them on the vehicle <code>ID</code> to get each crossing vehicle's class, then count by class. Leave out rows where <code>unconfirmed</code> is True to match the counts shown in the app.</p>
+        </details>
+        <details>
+          <summary>Can I move the counting lines after processing?</summary>
+          <p>No. Gates are fixed once processing starts, so draw every line you might need before you begin. Calibration is different: you can add, change or redo it at any time.</p>
+        </details>
       </div>
     </div>
   </section>
@@ -370,25 +508,25 @@ footer { background: var(--paper); border-top: 1px solid var(--line); padding: 2
     <div class="wrap">
       <div class="sec-head">
         <h2>Download for Windows</h2>
-        <p>One installer, no administrator rights and no internet connection needed.</p>
+        <p>One installer. You don't need administrator rights or an internet connection.</p>
       </div>
       <div class="dl-grid">
         <div>
-          <h3>System requirements</h3>
+          <h3>What your computer needs</h3>
           <dl class="req">
             <dt>System</dt><dd>Windows 10 or Windows 11, 64-bit</dd>
             <dt>Memory</dt><dd>16 GB RAM recommended</dd>
-            <dt>Disk</dt><dd>About 6 GB for the program, plus room for videos and results</dd>
-            <dt>Graphics</dt><dd>An NVIDIA GPU with a recent driver is recommended. Without one, DRISHT-E runs on the processor, which is much slower.</dd>
+            <dt>Disk</dt><dd>About 6 GB for the program, plus room for your videos and results</dd>
+            <dt>Graphics</dt><dd>An NVIDIA graphics card with a recent driver is recommended. Without one, DRISHT-E still works, but processing is much slower.</dd>
             <dt>Internet</dt><dd>Not needed</dd>
           </dl>
         </div>
         <div>
           <h3>Install</h3>
           <ol class="install">
-            <li>From the latest release, download the <code>.exe</code> and <strong>every</strong> <code>.bin</code> file, and keep them in one folder.</li>
+            <li>From the latest release, download the <code>.exe</code> file and <strong>every</strong> <code>.bin</code> file, and keep them together in one folder. The installer needs all of them.</li>
             <li>Run <code>DRISHT-E-Setup-&lt;version&gt;.exe</code>.</li>
-            <li>If Windows says “Windows protected your PC”, choose <strong>More info</strong>, then <strong>Run anyway</strong>. The installer isn't code-signed yet.</li>
+            <li>If Windows says “Windows protected your PC”, choose <strong>More info</strong>, then <strong>Run anyway</strong>. The warning appears because the installer doesn't carry a digital signature yet.</li>
             <li>Open DRISHT-E from the Start menu. The first start can take a minute or two.</li>
           </ol>
         </div>
@@ -400,7 +538,7 @@ footer { background: var(--paper); border-top: 1px solid var(--line); padding: 2
         </a>
         <a class="btn btn-ghost" href="https://github.com/GeorgeVJose/DRISHTE-Public/releases">All releases</a>
       </div>
-      <p class="note">To update, install the new version over the old one; your jobs and settings are kept. Results live in <code>%LOCALAPPDATA%\DRISHT-E</code>, and uninstalling leaves them in place.</p>
+      <p class="note">To update, install the new version over the old one; your jobs and settings are kept. Results are saved in <code>%LOCALAPPDATA%\DRISHT-E</code>, and uninstalling leaves them in place.</p>
     </div>
   </section>
 
@@ -411,7 +549,7 @@ footer { background: var(--paper); border-top: 1px solid var(--line); padding: 2
       </a>
       <div>
         <h2>The user guide</h2>
-        <p>Everything from installing to troubleshooting, with a screenshot of every screen and an explanation of every column in the data.</p>
+        <p>A step-by-step guide from installing to troubleshooting, with a picture of every screen and an explanation of every column in the data. Read “Things to remember” before your first survey.</p>
         <ul class="chapters">
           <li>Installing and starting</li>
           <li>Setting up a job</li>
